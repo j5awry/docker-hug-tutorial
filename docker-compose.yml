@@ -1,0 +1,12 @@
+version: "3.2"
+services:
+  postgresql:
+    image: postgres:9.6.6
+  iris:
+    build: ./iris
+    volumes:
+      - iris_vol:/var/lib/iris
+    ports:
+      - "8000:8000"
+volumes:
+  iris_vol:

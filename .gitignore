@@ -1,0 +1,13 @@
+.DS_Store
+
+#Python Files
+__pycache__
+*.py[cod]
+*$py.class
+
+# Installer logs
+pip-log.txt
+
+#virtualenv
+
+venv/
