@@ -1,5 +1,11 @@
 <header>
-  <h1>Docker Hug Webapp Tutorial</h1>
+  <h1><a href="/docker-hug-tutorial">Docker Hug Webapp Tutorial</a></h1>
   <p>A Tutorial To Wrap Your Arms Around</p>
   <p class="view"><a href="https://github.com/j5awry/docker-hug-tutorial">View the code!</a></p>
+  <ul><p>Lessons</p>
+  {% assign sorted = site.posts | sort: "order" %}
+  {% for post in sorted %}
+    <li><a href=/docker-hug-tutorial/{{post.url}}>{{post.title}}</a></li>
+  {% endfor %}
+  </ul>
 </header>
