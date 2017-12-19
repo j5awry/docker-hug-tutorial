@@ -1,0 +1,12 @@
+# Site settings
+title: John Chittum
+email: john.chittum@gmail.com
+description: 
+baseurl: "/" # the subpath of your site, e.g. /blog/
+url: "http://locahost:4000" # the base hostname & protocol for your site
+twitter_username: basementhobo
+github_username:  j5awry
+
+# Build settings
+markdown: kramdown
+composition_types: [acoustic, electronic, other]
