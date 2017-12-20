@@ -1,0 +1,4 @@
+gunicorn
+hug
+psycopg2
+sqlalchemy

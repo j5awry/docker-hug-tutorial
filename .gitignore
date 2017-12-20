@@ -11,3 +11,6 @@ pip-log.txt
 #virtualenv
 
 venv/
+
+#because this repo has a gh-page
+_site/
