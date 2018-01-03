@@ -1,10 +1,15 @@
 import hug
 import sqlalchemy
+import logging
+
 
 @hug.get('/echo')
 def echo(text):
-        return text
+    logging.error(text)
+    return text
+
 
 @hug.get('/hello')
 def hello():
-        return "Hello from Iris, messenger of the Gods"
+    logging.error("Hello called")
+    return "Hello from Iris, messenger of the Gods"
