@@ -1,12 +1,22 @@
-version: "3.2"
+version: "3.6"
 services:
-  postgresql:
-    image: postgres:9.6.6
+  pgdb:
+    build: ./postgres
+    volumes:
+      - postgres_vol:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: iris
+      POSTGRES_DB: iris
   iris:
     build: ./iris
     volumes:
-      - iris_vol:/var/lib/iris
+      - ./iris/app:/var/lib/iris/app
     ports:
       - "8000:8000"
+    environment:
+      IRIS_USER: iris
+      IRIS_PASS: ${IRIS_PASS}
+    depends_on:
+      - pgdb
 volumes:
-  iris_vol:
+  postgres_vol:
