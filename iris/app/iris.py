@@ -1,39 +1,93 @@
 import hug
-#import sqlalchemy
+from app import alembic
 import logging
-from falcon import HTTP_404, HTTP_500
+import sqlalchemy
+from falcon import HTTP_404, HTTP_500, HTTP_400, HTTP_201
 import collections
+import os
+import json
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+ENGINE = sqlalchemy.create_engine(
+    'postgresql+psycopg2://{}:{}@pgdb:5432/iris'.format(
+        os.getenv("IRIS_USER"),
+        os.getenv("IRIS_PASS")),
+    echo=False,
+    echo_pool=False)
+SESSION = sqlalchemy.orm.sessionmaker(bind=ENGINE)
 
 
 @hug.get('/tickets')
 def tickets():
-    logging.error("Tickets called")
+    logging.debug("Tickets called")
     return [{"id": 1, "title": "Our First Ticket"}]
 
 
+@hug.put('/tickets')
+def put_ticket(response, 
+               title: hug.types.text,
+               assignee: hug.types.text=None,
+               due: hug.types.text=None,
+               description: hug.types.text=None):
+    logging.debug("Putting a new ticket")
+    session = SESSION()
+    new_ticket = alembic.Ticket(
+        title=title,
+        assignee=assignee,
+        due=due,
+        description=description)
+    try:
+        logging.debug("Attempting ticket creation")
+        session.add(new_ticket)
+        session.commit()
+    except Exception as e:
+        logging.error(e)
+        session.rollback()
+        message = {"code": "500",
+                   "message": "something has gone wrong"}
+        response.status = HTTP_500
+        return message
+    finally:
+        session.close()
+    return {"code": "201"}
+
+
 @hug.get('/tickets/{ticket_id}')
-def ticket(request, response, ticket_id: int):
+def get_ticket(request, response, ticket_id):
     response_dict = collections.OrderedDict()
-    if ticket_id == 1:
-        logging.error("Ticket dict for {ticket_id}".format(**locals()))
-        response_dict['id'] = 1
-        response_dict['title'] = "Our First Ticket"
-        response_dict['assignee'] = None
-        response_dict['created'] = "Today"
-        response_dict['due'] = "Tomorrow"
-        comment_dict = collections.OrderedDict()
-        comment_dict['id'] = 1
-        comment_dict['body'] = "BEST.TICKET.EVER"
-        response_dict['comments'] = [comment_dict]
-        wf_dict = collections.OrderedDict()
-        wf_dict["type"] = "default"
-        wf_dict["status"] = "Open"
-        response_dict['workflow'] = wf_dict
-        return response_dict
-    else:
-        logging.error("No ticket by id {}".format(ticket_id))
+    session = SESSION()
+    tid = ticket_id
+    try:
+        logging.info("Getting ticket dict for {}".format(ticket_id))
+        ticket_query = session.query(alembic.Ticket)\
+            .filter(alembic.Ticket.ticket_id == tid)\
+            .one()
+    except Exception as e:
+        logging.error(e)
+        session.rollback()
+        message = {"status_code": "404",
+                   "message": "No ticket {}".format(ticket_id)}
         response.status = HTTP_404
-        return HTTP_404
+        return message
+    finally:
+        session.close()
+    queryd = {k: v for (k, v) in ticket_query.__dict__.items() if k != "_sa_instance_state"}
+    logging.info("Query return : %s", queryd)
+    response_dict['ticket_info'] = json.loads(
+        json.dumps(queryd))
+    comment_dict = collections.OrderedDict()
+    comment_dict['id'] = 1
+    comment_dict['body'] = 'BEST.TICKET.EVER'
+    response_dict['comments'] = json.loads(json.dumps(comment_dict))
+    wf_dict = collections.OrderedDict()
+    wf_dict["type"] = 'default'
+    wf_dict["status"] = 'Open'
+    response_dict['workflow'] = json.loads(json.dumps(wf_dict))
+    real_response = json.loads(json.dumps(response_dict))
+    logging.info("ticket information: {}".format(real_response))
+    return real_response
 
 
 @hug.get('/echo')
