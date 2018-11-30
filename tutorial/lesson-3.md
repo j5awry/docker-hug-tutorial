@@ -1,8 +1,8 @@
 # Lesson 3 : Hook It Up!
 
-## Updateing docker-compose
+## Updating docker-compose
 
-Let's move into a connected world, one where Postgresql is available. Let's start by updating docker-compose.yml. Almost like I let this sit for a while...
+Let's move into a connected world, one where Postgresql is available. I'll start by updating docker-compose.yml. Almost like I let this sit for a while...
 
     version: "3.6"
     services:
@@ -33,11 +33,11 @@ First, we're removing the named iris volume. Named volumes are great for perpetu
     docker rmi <previous built images>
     docker volume prune (Note, this will kill any unused volumes. If you're working on other things, you might want to use [docker volume rm](https://docs.docker.com/engine/reference/commandline/volume_rm/#extended-description))
 
-Next, you'll notice a couple environment stanzas. These allow the setting of environment variables when running `docker-compose up`. I'm being extremely original with my names for user and database name. 
+Next, you'll notice a couple of environment stanzas. These create environment variables in the containers when running `docker-compose up`. I'm being extremely original with my names for user and database name. 
 
 Under iris you'll see ${IRIS_PASS}. docker-compose allows for environment variable expansion, thus allowing you to pass your environment variables into a container! Neato! In this case, I'm setting the password iris will use to connect to the db (eventually).
 
-Now let's chat about the Postgresql image. There's some good documentation about the Postgres setup with Docker in [the official docs](https://docs.docker.com/samples/library/postgres/). Of note are the environment variables, and what they do for Postgres's container on creation. First, setting `POSTGRES_USER` not only sets the user that the container uses for postgres interaction, it also automatically creates the user if not present, _and_ creates a database named `POSTGRES_USER` with full privileges. That saves us a setup step!
+Now let's chat about the Postgresql image. There's some good documentation about the Postgres setup with Docker in [the official docs](https://docs.docker.com/samples/library/postgres/). Of note are the environment variables, and what they do for Postgres's container on creation. First, setting `POSTGRES_USER` not only sets the user that the container uses for postgres interaction, it also automatically creates the user if not present, _and_ creates a database named `POSTGRES_USER` with full privileges. That saves us a setup step! It also makes `POSTGRES_DB` redundant, but it's helpful to show the variable here (in case you wish to use a different database).
 
 `depends_on` is an important addition to iris. This tell docker-compose to setup a network between the two containers. The Postgresql container defaults to listening & exposing 5432 (as all Postgresql does), so any communication from iris to postgresql will need to use that port. 
 
